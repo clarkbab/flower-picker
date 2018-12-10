@@ -1,0 +1,6 @@
+device: 'cpu'
+epochs: 3
+criterion: NLLLoss
+optimizer:
+  name: Adam
+  lr: 0.001

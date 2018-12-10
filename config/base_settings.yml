@@ -1,0 +1,10 @@
+alexnet:
+  classifier: classifier
+  in_features: 9216
+resnet18:
+  classifier: fc
+  in_features: 512
+vgg16:
+  classifier: classifier
+  in_features: 25088
+  

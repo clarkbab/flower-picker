@@ -1,0 +1,50 @@
+# This file is the runner for training a new NN.
+
+# It does the following:
+
+# - Parses the options using Optparses.
+# - Creates a new NN using passed options.
+# - Trains the NN using the passed options.
+
+from lib.options import parse_train
+from lib.config_parser import ConfigParser
+from lib.data_loader import DataLoader
+from lib.model import Model
+from lib.model_trainer import ModelTrainer
+from lib.checkpoint import Checkpoint
+
+# Parse training options.
+options, args = parse_train()
+
+# Load config.
+loaders_conf = ConfigParser.parse('loaders')
+model_conf = ConfigParser.parse('model')
+train_conf = ConfigParser.parse('training')
+
+# Overwrite default config.
+save_dir = options.save_dir or 'checkpoints'
+model_conf['base'] = options.arch or model_conf['base']
+model_conf['layers'][1]['size'] = options.hidden_units or model_conf['layers'][1]['size']
+train_conf['device'] = 'cuda' if options.gpu else train_conf['device']
+train_conf['epochs'] = options.epochs or train_conf['epochs']
+train_conf['optimizer']['lr'] = options.learning_rate or train_conf['optimizer']['lr']
+
+# Get our training and validation data.
+train_folder = 'data/train'
+valid_folder = 'data/valid'
+train_loader = DataLoader(data_folder=train_folder, trans_conf=loaders_conf['training']['transforms'], batch_size=loaders_conf['training']['batch_size'])
+valid_loader = DataLoader(data_folder=valid_folder, trans_conf=loaders_conf['validation']['transforms'], batch_size=loaders_conf['validation']['batch_size'])
+
+# Build our model.
+model = Model(conf=model_conf, idx_to_class=train_loader.index_to_class)
+
+# Train our model.
+trainer = ModelTrainer(
+	model=model,
+	train_data=train_loader,
+	valid_data=valid_loader,
+	conf=train_conf,
+	validate_every=5,
+	save_dir=save_dir
+)
+trainer.train()

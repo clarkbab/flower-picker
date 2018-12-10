@@ -1,0 +1,13 @@
+base: vgg16
+layers:
+  # Size is inferred from base for first layer.
+  - activation: ReLU
+    dropout: 0.2
+  - size: 256
+    activation: ReLU
+    dropout: 0.2
+  - size: 102
+    activation:
+      name: LogSoftmax
+      kwargs: 
+        dim: 1
