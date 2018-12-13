@@ -13,7 +13,7 @@ class DataLoader:
 
 		# Create PyTorch dataset and dataloader.
 		self.dataset = torchvision.datasets.ImageFolder(self.data_folder, transform=self.transforms)
-		self.dataloader = iter(torch.utils.data.DataLoader(self.dataset, batch_size=batch_size, shuffle=True))
+		self.dataloader = torch.utils.data.DataLoader(self.dataset, batch_size=batch_size, shuffle=True)
 
 		# Create mapping from index to class.
 		self.index_to_class = {v: k for k, v in self.dataset.class_to_idx.items()}
@@ -22,7 +22,7 @@ class DataLoader:
 		return len(self.dataset)
 		
 	def __iter__(self):
-		return self
+		return iter(self.dataloader)
 
 	def __next__(self):
 		# Iterate over the dataloader.

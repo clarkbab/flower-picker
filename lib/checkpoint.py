@@ -5,12 +5,12 @@ from lib.model import Model
 
 class Checkpoint:
 	@classmethod
-	def save(self, model, path):
+	def create(self, model, path):
 		# Create checkpoint data.
 		data = {
 			'conf': model.conf,
 			'idx_to_class': model.idx_to_class,
-			'state': model.network.classifier.state_dict()
+			'state': model.state
 		}
 
 		# Ensure that directory exists before saving.

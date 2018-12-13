@@ -1,17 +1,11 @@
-# This file is the runner for training a new NN.
+#! /usr/bin/env python
 
-# It does the following:
-
-# - Parses the options using Optparses.
-# - Creates a new NN using passed options.
-# - Trains the NN using the passed options.
-
+import os
 from lib.options import parse_train
 from lib.config_parser import ConfigParser
 from lib.data_loader import DataLoader
 from lib.model import Model
 from lib.model_trainer import ModelTrainer
-from lib.checkpoint import Checkpoint
 
 # Parse training options.
 options, args = parse_train()
@@ -40,11 +34,11 @@ model = Model(conf=model_conf, idx_to_class=train_loader.index_to_class)
 
 # Train our model.
 trainer = ModelTrainer(
-	model=model,
-	train_data=train_loader,
-	valid_data=valid_loader,
-	conf=train_conf,
-	validate_every=5,
-	save_dir=save_dir
+  model=model,
+  train_data=train_loader,
+  valid_data=valid_loader,
+  conf=train_conf,
+  validate_every=5,
+  save_dir=save_dir
 )
 trainer.train()

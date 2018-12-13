@@ -7,10 +7,10 @@ from lib.config_parser import ConfigParser
 # A wrapper for the PyTorch model.
 class Model:
 	def __init__(self, conf, idx_to_class, state=None):
-		# Save the config.
+		# Save the config. This is useful for persisting the model.
 		self.conf = conf
 
-		# Save the idx_to_class.
+		# Save the idx_to_class. Also useful when persisting.
 		self.idx_to_class = idx_to_class
 
 		# Build the underlying model.
@@ -38,7 +38,27 @@ class Model:
 
 		return top_cs, top_ps
 
+	@property
+	def state(self):
+		return self.classifier.state_dict()
+
+	def forward(self, input):
+		return self.network.forward(input)
+
+	def eval(self):
+		return self.network.eval()
+
+	def train(self):
+		return self.network.train()
+
+	def to(self, device):
+		return self.network.to(device)
+
 	def __build(self, state):
+		self.__build_base()
+		self.__build_classifier(state)
+
+	def __build_base(self):
 		# Get pre-trained model.
 		self.network = getattr(torchvision.models, self.conf['base'])(pretrained=True)
 
@@ -46,6 +66,7 @@ class Model:
 		for param in self.network.parameters():
 			param.requires_grad = False
 
+	def __build_classifier(self, state):
 		# Get input size from pre-trained model.
 		n_inputs = BaseSettings.get(self.conf['base'], 'in_features')
 
@@ -75,8 +96,10 @@ class Model:
 		])
 
 		# Replace classifier.
-		self.network.classifier = nn.Sequential(*layers)
+		cls_attr = BaseSettings.get(self.conf['base'], 'classifier')
+		self.classifier = nn.Sequential(*layers)
+		setattr(self.network, cls_attr, self.classifier)
 
 		# Load state if present.
 		if state != None:
-			self.network.classifier.load_state_dict(state)
+			self.classifier.load_state_dict(state)
